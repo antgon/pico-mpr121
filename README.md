@@ -2,7 +2,7 @@
 
 A C library for using an MPR121-based touch sensor with the Raspberry Pi Pico
 
-The [MPR121](https://www.nxp.com/docs/en/data-sheet/MPR121.pdf) is a capcitive touch sensor controller with 12 electrodes. It forms the basis of a number of touch sensor boards such as Adafruit [product 1982](https://www.adafruit.com/product/1982) and Seeed Studio [Grove I2C Touch Sensor](https://wiki.seeedstudio.com/Grove-I2C_Touch_Sensor/).
+The [MPR121](https://www.nxp.com/docs/en/data-sheet/MPR121.pdf) is a capacitive touch sensor controller with 12 electrodes. It forms the basis of a number of touch sensor boards such as Adafruit [product 1982](https://www.adafruit.com/product/1982) and Seeed Studio [Grove I2C Touch Sensor](https://wiki.seeedstudio.com/Grove-I2C_Touch_Sensor/).
 
 
 ## Wiring
