@@ -161,6 +161,6 @@ static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
  * 
  * \return true if autoconfiguration was successful
  */
-bool mpr121_set_autoconfig(void){};
+bool mpr121_set_autoconfig(void);
 
 #endif
