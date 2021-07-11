@@ -125,8 +125,11 @@ void mpr121_init(void) {
 }
 
 void mpr121_set_autoconfig(void){
-    // Enter stop mode. This is needed because register write 
-    // operations can only be done in stop mode.
+    // Read current configuration and then enter stop mode. Stop mode
+    // is needed because register write operations can only be done in
+    // this mode.
+    uint8_t config;
+    mpr121_read(MPR121_ELECTRODE_CONFIG, &config);
     mpr121_write(MPR121_ELECTRODE_CONFIG, 0x00);
 
     // Autoconfig USL register: the upper limit for the
@@ -162,4 +165,7 @@ void mpr121_set_autoconfig(void){
     // Automatic Reconfiguration Enable (ACE), bit 0. Default is 0b1,
     // enabled.
     mpr121_write(MPR121_AUTOCONFIG_CONTROL_0, 0x0B);
+
+    // Re-enable electrode(s) by writing back the configuration bits.
+    mpr121_write(MPR121_ELECTRODE_CONFIG, config);
 }
