@@ -33,7 +33,8 @@
 // Register map
 
 #define MPR121_TOUCH_STATUS _u(0x00)
-#define MPR121_OOR_STATUS _u(0x02)
+#define MPR121_OUT_OF_RANGE_STATUS_0 _u(0x02)
+#define MPR121_OUT_OF_RANGE_STATUS_1 _u(0x03)
 #define MPR121_ELECTRODE_FILTERED_DATA _u(0x04)
 #define MPR121_BASELINE_VALUE _u(0x1E)
 // Registers 0x2B ~ 0x7F are control and configuration registers
@@ -157,7 +158,9 @@ static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
  * values used for this depend on Vdd, see NXP Application Note AN3889.
  * Here, these values have been calculated for Vdd = 3.3 V, which is
  * that in the Pico.
+ * 
+ * \return true if autoconfiguration was successful
  */
-void mpr121_set_autoconfig(void){};
+bool mpr121_set_autoconfig(void){};
 
 #endif

@@ -124,7 +124,7 @@ void mpr121_init(void) {
     mpr121_write(MPR121_ELECTRODE_CONFIG, 0xCF);
 }
 
-void mpr121_set_autoconfig(void){
+bool mpr121_set_autoconfig(void){
     // Read current configuration and then enter stop mode. Stop mode
     // is needed because register write operations can only be done in
     // this mode.
@@ -168,4 +168,16 @@ void mpr121_set_autoconfig(void){
 
     // Re-enable electrode(s) by writing back the configuration bits.
     mpr121_write(MPR121_ELECTRODE_CONFIG, config);
+
+    // Bits 7-6 in ELE-8 out-of-range register are flags that are set
+    // when auto-(re)configuration fails.
+    bool autoconf_failed = false;
+    uint8_t out_of_range_status;
+    mpr121_read(MPR121_OUT_OF_RANGE_STATUS_1, &out_of_range_status);
+    if ((out_of_range_status & 0b11000000) == 0){
+        autoconf_failed = false;
+    } else {
+        autoconf_failed = true;
+    }
+    return autoconf_failed;
 }
