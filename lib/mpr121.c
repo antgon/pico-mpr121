@@ -169,8 +169,9 @@ bool mpr121_set_autoconfig(void){
     // Re-enable electrode(s) by writing back the configuration bits.
     mpr121_write(MPR121_ELECTRODE_CONFIG, config);
 
-    // Bits 7-6 in ELE-8 out-of-range register are flags that are set
-    // when auto-(re)configuration fails.
+    // Check to see if autoconfiguration worked. Bits 7-6 in ELE-8
+    // out-of-range register are flags that are set when
+    // auto-(re)configuration fails.
     bool autoconf_failed = false;
     uint8_t out_of_range_status;
     mpr121_read(MPR121_OUT_OF_RANGE_STATUS_1, &out_of_range_status);
