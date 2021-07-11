@@ -123,3 +123,43 @@ void mpr121_init(void) {
     // Value 0b00001111 = 0x0F Value 0b11001111 = 0xCF
     mpr121_write(MPR121_ELECTRODE_CONFIG, 0xCF);
 }
+
+void mpr121_set_autoconfig(void){
+    // Enter stop mode. This is needed because register write 
+    // operations can only be done in stop mode.
+    mpr121_write(MPR121_ELECTRODE_CONFIG, 0x00);
+
+    // Autoconfig USL register: the upper limit for the
+    // auto-configuration.
+    // USL = 201 = 0xC9
+    mpr121_write(MPR121_AUTOCONFIG_USL, 0xC9);
+
+    // Autoconfig target level register: the target level for the 
+    // auto-configuration baseline search.
+    // TL = 181 = 0xB5
+    mpr121_write(MPR121_AUTOCONFIG_TARGET, 0xB5);
+
+    // Autoconfig LSL register: the lower limit for the
+    // auto-configuration.
+    // LSL = 131 = 0x83
+    mpr121_write(MPR121_AUTOCONFIG_LSL, 0x83);
+
+    // Autoconfiguration control register.
+    // Default value is 0b00001011 = 0x0B
+    //
+    // First filter iterations (FFI), bits 7-6. Must be the same value
+    // of FFI as in the general configuration, see mpr121_init().
+    // Default is 0b00.
+    //
+    // Retry, bits 5-4. Default is diabled, 0b00.
+    //
+    // Baseline value adjust (BVA), bits 3-2. Default is 0b10, which
+    // allows the baseline to be adjusted.
+    //
+    // Automatic Reconfiguration Enable (ARE), bit 1. Default is 0b1,
+    // enabled.
+    //
+    // Automatic Reconfiguration Enable (ACE), bit 0. Default is 0b1,
+    // enabled.
+    mpr121_write(MPR121_AUTOCONFIG_CONTROL_0, 0x0B);
+}

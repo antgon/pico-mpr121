@@ -151,4 +151,13 @@ static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
     *val = baseline << 2;
 }
 
+/*! \brief Enable autoconfiguration
+ *
+ * Automatically configure charge current and charge time. The optimal
+ * values used for this depend on Vdd, see NXP Application Note AN3889.
+ * Here, these values have been calculated for Vdd = 3.3 V, which is
+ * that in the Pico.
+ */
+void mpr121_set_autoconfig(void){};
+
 #endif
