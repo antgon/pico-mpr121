@@ -152,7 +152,7 @@ static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
     *val = baseline << 2;
 }
 
-/*! \brief Enable autoconfiguration
+/*! \brief Autoconfigure sensors
  *
  * Automatically configure charge current and charge time. The optimal
  * values used for this depend on Vdd, see NXP Application Note AN3889.

@@ -133,7 +133,9 @@ bool mpr121_autoconfig(void){
     mpr121_write(MPR121_ELECTRODE_CONFIG, 0x00);
 
     // Autoconfig USL register: the upper limit for the
-    // auto-configuration.
+    // auto-configuration. This value (and those that follow below)
+    // were calculated based on Vdd = 3.3 V and following the equations
+    // in NXP Application Note AN3889.
     // USL = 201 = 0xC9
     mpr121_write(MPR121_AUTOCONFIG_USL, 0xC9);
 
@@ -148,7 +150,8 @@ bool mpr121_autoconfig(void){
     mpr121_write(MPR121_AUTOCONFIG_LSL, 0x83);
 
     // Autoconfiguration control register.
-    // Default value is 0b00001011 = 0x0B
+    //
+    // Default value is 0b00001011 = 0x0B, where:
     //
     // First filter iterations (FFI), bits 7-6. Must be the same value
     // of FFI as in the general configuration, see mpr121_init().
