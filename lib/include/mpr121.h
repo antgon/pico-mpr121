@@ -54,8 +54,10 @@
 #define MPR121_RELEASE_THRESHOLD _u(0x42)
 // (ELEPROX 0x59 .. 0x5A)
 #define MPR121_DEBOUNCE _u(0x5B)
-#define MPR121_CONFIG1 _u(0x5C)
-#define MPR121_CONFIG2 _u(0x5D)
+//#define MPR121_CONFIG1 _u(0x5C)
+//#define MPR121_CONFIG2 _u(0x5D)
+#define MPR121_AFE_CONFIG_REG _u(0x5C)
+#define MPR121_FILTER_CONFIG_REG _u(0x5D)
 #define MPR121_ELECTRODE_CONFIG _u(0x5E) // ECR
 #define MPR121_ELECTRODE_CURRENT _u(0x5F)
 // (0x6C..0x72: Charge time registers.)
