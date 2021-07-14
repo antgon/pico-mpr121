@@ -49,8 +49,9 @@ int main()
     gpio_pull_up(I2C_SDA);
     gpio_pull_up(I2C_SCL);
 
-    // Initialise the touch sensor.
+    // Initialise and autoconfigure the touch sensor.
     mpr121_init();
+    mpr121_autoconfig();
 
     // Enable only one touch sensor (electrode 0).
     mpr121_enable_electrodes(1);
