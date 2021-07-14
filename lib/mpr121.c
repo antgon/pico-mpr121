@@ -18,8 +18,8 @@ void mpr121_init(void) {
     mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00);
 
     // Set touch and release thresholds.
-    mpr121_set_thresholds(MPR121_DEFAULT_TOUCH_THRESHOLD,
-                          MPR121_DEFAULT_RELEASE_THRESHOLD);
+    mpr121_set_thresholds(MPR121_TOUCH_THRESHOLD,
+                          MPR121_RELEASE_THRESHOLD);
 
     // Configure electrode filtered data and baseline registers
 
