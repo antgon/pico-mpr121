@@ -27,8 +27,8 @@ electrode is polled at 100-ms intervals and
 // #define MPR121_I2C_FREQ 100000
 
 // Touch and release thresholds. Uncomment to change these default values.
-// #define MPR121_DEFAULT_TOUCH_THRESHOLD 16
-// #define MPR121_DEFAULT_RELEASE_THRESHOLD 10
+// #define MPR121_TOUCH_THRESHOLD 16
+// #define MPR121_RELEASE_THRESHOLD 10
 
 // Include the MPR11 library only after the definitions above.
 #include "mpr121.h"
