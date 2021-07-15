@@ -7,7 +7,15 @@
 #ifndef _MPR121_H_
 #define _MPR121_H_
 
+#include "pico.h"
 #include "hardware/i2c.h"
+
+/** \file mpr121.h
+ *
+ * Library for using an MPR121-based touch sensor with the Raspberry Pi
+ * Pico
+ *
+*/
 
 #ifndef I2C_PORT
 #define I2C_PORT i2c0
@@ -68,17 +76,31 @@
 #define MPR121_AUTOCONFIG_TARGET_REG _u(0x7F)
 #define MPR121_SOFT_RESET_REG _u(0x80)
 
-
+/*! \brief Write a value to the specified register
+ *
+ *  \param reg The register address
+ *  \param val The value to write
+ */
 static void mpr121_write(uint8_t reg, uint8_t val) {
     uint8_t buf[] = {reg, val};
     i2c_write_blocking(I2C_PORT, MPR121_ADDR, buf, 2, false);
 }
 
+/*! \brief Read a (8-bit) value from the specified register
+ *
+ *  \param reg The register address
+ *  \param val The value to read into
+ */
 static void mpr121_read(uint8_t reg, uint8_t *val) {
     i2c_write_blocking(I2C_PORT, MPR121_ADDR, &reg, 1, true);
     i2c_read_blocking(I2C_PORT, MPR121_ADDR, val, 1, false);
 }
 
+/*! \brief Read a (16-bit) value from the specified register
+ *
+ *  \param reg The register address
+ *  \param val The value to read into
+ */
 static void mpr121_read16(uint8_t reg, uint16_t *val) {
     uint8_t buf[2];
     i2c_write_blocking(I2C_PORT, MPR121_ADDR, &reg, 1, true);
