@@ -7,8 +7,6 @@
 #include "mpr121.h"
 
 void mpr121_init(void) {
-    // Resets the MPR121 and configures registers.
-
     // Writing 0x80 (SOFT_RESET) with 0x63 asserts soft reset.
     mpr121_write(MPR121_SOFT_RESET_REG, 0x63);
     

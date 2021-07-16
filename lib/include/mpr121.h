@@ -11,8 +11,7 @@
 #include "hardware/i2c.h"
 
 /** \file mpr121.h
- *
- * Library for using an MPR121-based touch sensor with the Raspberry Pi
+ * \brief Library for using an MPR121-based touch sensor with the Raspberry Pi
  * Pico
  *
 */
@@ -76,30 +75,46 @@
 #define MPR121_AUTOCONFIG_TARGET_REG _u(0x7F)
 #define MPR121_SOFT_RESET_REG _u(0x80)
 
+/*! \brief Resets the MPR121 and configures registers
+ *
+ */
+void mpr121_init(void);
+
+/*! \brief Autoconfigure sensors
+ *
+ * Automatically configure charge current and charge time. The optimal
+ * values used for this depend on Vdd, see NXP Application Note AN3889.
+ * Here, these values have been calculated for Vdd = 3.3 V, which is
+ * that in the Pico.
+ * 
+ * \return true if autoconfiguration was successful
+ */
+bool mpr121_autoconfig(void);
+
 /*! \brief Write a value to the specified register
  *
- *  \param reg The register address
- *  \param val The value to write
+ * \param reg The register address
+ * \param val The value to write
  */
 static void mpr121_write(uint8_t reg, uint8_t val) {
     uint8_t buf[] = {reg, val};
     i2c_write_blocking(I2C_PORT, MPR121_ADDR, buf, 2, false);
 }
 
-/*! \brief Read a (8-bit) value from the specified register
+/*! \brief Read a byte from the specified register
  *
- *  \param reg The register address
- *  \param val The value to read into
+ * \param reg The register address
+ * \param val The value to read into
  */
 static void mpr121_read(uint8_t reg, uint8_t *val) {
     i2c_write_blocking(I2C_PORT, MPR121_ADDR, &reg, 1, true);
     i2c_read_blocking(I2C_PORT, MPR121_ADDR, val, 1, false);
 }
 
-/*! \brief Read a (16-bit) value from the specified register
+/*! \brief Read a 2-byte value from the specified register
  *
- *  \param reg The register address
- *  \param val The value to read into
+ * \param reg The register address
+ * \param val The value to read into
  */
 static void mpr121_read16(uint8_t reg, uint16_t *val) {
     uint8_t buf[2];
@@ -108,12 +123,16 @@ static void mpr121_read16(uint8_t reg, uint16_t *val) {
     *val = buf[1] << 8 | buf[0];
 }
 
+/*! \brief Set touch and release thresholds
+ * 
+ * In a typical application, touch threshold is in the range 4..16,
+ * and it is several counts larger than the release threshold. This
+ * is to provide hysteresis and to prevent noise and jitter.
+ *  
+ * \param touch Touch threshold in the range 0..255
+ * \param release Release threshold in the range 0..255
+ */
 static void mpr121_set_thresholds(uint8_t touch, uint8_t release) {
-    // Thresholds in the range 0~0xFF. In a typical touch detection
-    // application, threshold is typically in the range 0x04~0x10. The
-    // touch threshold is several counts larger than the release
-    // threshold. This is to provide hysteresis and to prevent noise and
-    // jitter.
     uint8_t config;
     mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config);
     if (config != 0){
@@ -131,14 +150,16 @@ static void mpr121_set_thresholds(uint8_t touch, uint8_t release) {
     }
 }
 
-void mpr121_init(void);
-
+/*! \brief Enable only the number of electrodes specified
+ * 
+ * E.g. if `nelec` is 3, only electrodes 0 to 2 will be enabled; if it
+ * is 6, electrodes 0 to 5 will be enabled. From the datasheet:
+ * "Enabling specific channels will save the scan time and sensing
+ * field power spent on the unused channels."
+ * 
+ * \param nelec Number of electrodes to enable
+*/
 static void mpr121_enable_electrodes(uint8_t nelec){
-    // Enable only the number of electrodes specified, e.g. if `nelec`
-    // is 3, only electrodes 0 to 2 will be enabled; if it is 6,
-    // electrodes 0 to 5 will be enabled. "Enabling specific channels
-    // will save the scan time and sensing field power spent on the
-    // unused channels."
     uint8_t config;
     mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config);
     config &= 0xf0 + nelec;
@@ -163,6 +184,11 @@ static void mpr121_filtered_data(uint8_t electrode, uint16_t *val){
     *val &= 0x3ff;
 }
 
+/*! \brief Read the baseline value from an electrode
+ *
+ * \param electrode The electrode number to read the value from
+ * \param val The value to read into
+ */
 static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
     uint8_t baseline;
     mpr121_read(MPR121_BASELINE_VALUE_REG + electrode, &baseline);
@@ -173,16 +199,5 @@ static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
     // with the 10-bit electrode data.
     *val = baseline << 2;
 }
-
-/*! \brief Autoconfigure sensors
- *
- * Automatically configure charge current and charge time. The optimal
- * values used for this depend on Vdd, see NXP Application Note AN3889.
- * Here, these values have been calculated for Vdd = 3.3 V, which is
- * that in the Pico.
- * 
- * \return true if autoconfiguration was successful
- */
-bool mpr121_autoconfig(void);
 
 #endif
