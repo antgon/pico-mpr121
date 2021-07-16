@@ -94,7 +94,7 @@ bool mpr121_autoconfig(void);
 
 /*! \brief Write a value to the specified register
  *
- * \param reg The register address
+ * \sa reg The register address
  * \param val The value to write
  */
 static void mpr121_write(enum mpr121_register reg, uint8_t val) {
@@ -104,24 +104,24 @@ static void mpr121_write(enum mpr121_register reg, uint8_t val) {
 
 /*! \brief Read a byte from the specified register
  *
- * \param reg The register address
- * \param val The value to read into
+ * \sa reg The register address
+ * \param buf The buffer to read into
  */
-static void mpr121_read(enum mpr121_register reg, uint8_t *val) {
+static void mpr121_read(enum mpr121_register reg, uint8_t *buf) {
     i2c_write_blocking(I2C_PORT, MPR121_ADDR, &reg, 1, true);
-    i2c_read_blocking(I2C_PORT, MPR121_ADDR, val, 1, false);
+    i2c_read_blocking(I2C_PORT, MPR121_ADDR, buf, 1, false);
 }
 
 /*! \brief Read a 2-byte value from the specified register
  *
- * \param reg The register address
- * \param val The value to read into
+ * \sa reg The register address
+ * \param buf The buffer to read into
  */
-static void mpr121_read16(enum mpr121_register reg, uint16_t *val) {
-    uint8_t buf[2];
+static void mpr121_read16(enum mpr121_register reg, uint16_t *buf) {
+    uint8_t vals[2];
     i2c_write_blocking(I2C_PORT, MPR121_ADDR, &reg, 1, true);
-    i2c_read_blocking(I2C_PORT, MPR121_ADDR, buf, 2, false);
-    *val = buf[1] << 8 | buf[0];
+    i2c_read_blocking(I2C_PORT, MPR121_ADDR, vals, 2, false);
+    *buf = vals[1] << 8 | vals[0];
 }
 
 /*! \brief Set touch and release thresholds
@@ -153,13 +153,13 @@ static void mpr121_set_thresholds(uint8_t touch, uint8_t release) {
 
 /*! \brief Enable only the number of electrodes specified
  * 
+ * \param nelec Number of electrodes to enable
+ * 
  * E.g. if `nelec` is 3, only electrodes 0 to 2 will be enabled; if it
  * is 6, electrodes 0 to 5 will be enabled. From the datasheet:
  * "Enabling specific channels will save the scan time and sensing
  * field power spent on the unused channels."
- * 
- * \param nelec Number of electrodes to enable
-*/
+ */
 static void mpr121_enable_electrodes(uint8_t nelec){
     uint8_t config;
     mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config);
@@ -168,29 +168,49 @@ static void mpr121_enable_electrodes(uint8_t nelec){
     mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config);
 }
 
-static void mpr121_touched(uint16_t *val) {
-    mpr121_read16(MPR121_TOUCH_STATUS_REG, val);
-    *val &= 0x0fff;
+/*! \brief Read the touch/release status of all 13 input channels
+ *
+ * \param buf Buffer to read into
+ *
+ * Bits 11-0 represent electrodes 11 to 0, respectively, and bit 12 is
+ * the proximity detection channel. Each bit represent the status of
+ * these channels: 1 if the channel is touched, 0 if it is released.
+ */
+static void mpr121_touched(uint16_t *buf) {
+    mpr121_read16(MPR121_TOUCH_STATUS_REG, buf);
+    *buf &= 0x0fff;
 }
 
-static void mpr121_is_touched(uint8_t electrode, bool *val){
+/*! \brief Determine whether an electrode has been touched
+ *
+ * \param electrode Electrode number
+ * \param buf Buffer to read into
+ */
+static void mpr121_is_touched(uint8_t electrode, bool *buf){
     uint16_t touched;
     mpr121_touched(&touched);
-    *val = (bool) (touched >> electrode) & 1;
+    *buf = (bool) (touched >> electrode) & 1;
 }
 
-static void mpr121_filtered_data(uint8_t electrode, uint16_t *val){
-    mpr121_read16(MPR121_ELECTRODE_FILTERED_DATA_REG + (electrode * 2), val);
-    // Filtered data is 10-bit
-    *val &= 0x3ff;
-}
-
-/*! \brief Read the baseline value from an electrode
+/*! \brief Read an electrode's filtered data value
  *
- * \param electrode The electrode number to read the value from
- * \param val The value to read into
+ * \param electrode Electrode number
+ * \param buf Buffer to read into
+ * 
+ * The data range is 0 to 1024.
  */
-static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
+static void mpr121_filtered_data(uint8_t electrode, uint16_t *buf){
+    mpr121_read16(MPR121_ELECTRODE_FILTERED_DATA_REG + (electrode * 2), buf);
+    // Filtered data is 10-bit
+    *buf &= 0x3ff;
+}
+
+/*! \brief Read an electrode's baseline value
+ *
+ * \param electrode Electrode number
+ * \param buf Buffer to read into
+ */
+static void mpr121_baseline_value(uint8_t electrode, uint16_t *buf){
     uint8_t baseline;
     mpr121_read(MPR121_BASELINE_VALUE_REG + electrode, &baseline);
     // From the datasheet: Although internally the baseline value is
@@ -198,7 +218,7 @@ static void mpr121_baseline_value(uint8_t electrode, uint16_t *val){
     // value through the baseline value registers. The read out from the
     // baseline register must be left shift two bits before comparing it
     // with the 10-bit electrode data.
-    *val = baseline << 2;
+    *buf = baseline << 2;
 }
 
 #endif
