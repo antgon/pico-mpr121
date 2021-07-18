@@ -94,7 +94,7 @@ bool mpr121_autoconfig(void);
 
 /*! \brief Write a value to the specified register
  *
- * \sa reg The register address
+ * \param reg The register address
  * \param val The value to write
  */
 static void mpr121_write(enum mpr121_register reg, uint8_t val) {
@@ -104,7 +104,7 @@ static void mpr121_write(enum mpr121_register reg, uint8_t val) {
 
 /*! \brief Read a byte from the specified register
  *
- * \sa reg The register address
+ * \param reg The register address
  * \param buf The buffer to read into
  */
 static void mpr121_read(enum mpr121_register reg, uint8_t *buf) {
@@ -114,7 +114,7 @@ static void mpr121_read(enum mpr121_register reg, uint8_t *buf) {
 
 /*! \brief Read a 2-byte value from the specified register
  *
- * \sa reg The register address
+ * \param reg The register address
  * \param buf The buffer to read into
  */
 static void mpr121_read16(enum mpr121_register reg, uint16_t *buf) {
@@ -126,12 +126,13 @@ static void mpr121_read16(enum mpr121_register reg, uint16_t *buf) {
 
 /*! \brief Set touch and release thresholds
  * 
- * In a typical application, touch threshold is in the range 4..16,
- * and it is several counts larger than the release threshold. This
- * is to provide hysteresis and to prevent noise and jitter.
+ * From the MPR121 datasheet (section 5.6):
+ * > In a typical application, touch threshold is in the range 4--16,
+ * > and it is several counts larger than the release threshold. This
+ * > is to provide hysteresis and to prevent noise and jitter.
  *  
- * \param touch Touch threshold in the range 0..255
- * \param release Release threshold in the range 0..255
+ * \param touch Touch threshold in the range 0--255
+ * \param release Release threshold in the range 0--255
  */
 static void mpr121_set_thresholds(uint8_t touch, uint8_t release) {
     uint8_t config;
@@ -172,9 +173,10 @@ static void mpr121_enable_electrodes(uint8_t nelec){
  *
  * \param buf Buffer to read into
  *
- * Bits 11-0 represent electrodes 11 to 0, respectively, and bit 12 is
- * the proximity detection channel. Each bit represent the status of
- * these channels: 1 if the channel is touched, 0 if it is released.
+ * In the value read, bits 11-0 represent electrodes 11 to 0,
+ * respectively, and bit 12 is the proximity detection channel. Each
+ * bit represent the status of these channels: 1 if the channel is
+ * touched, 0 if it is released.
  */
 static void mpr121_touched(uint16_t *buf) {
     mpr121_read16(MPR121_TOUCH_STATUS_REG, buf);
@@ -197,7 +199,8 @@ static void mpr121_is_touched(uint8_t electrode, bool *buf){
  * \param electrode Electrode number
  * \param buf Buffer to read into
  * 
- * The data range is 0 to 1024.
+ * The data range of the filtered data is 0 to 1024.
+ * \sa mpr121_baseline_value
  */
 static void mpr121_filtered_data(uint8_t electrode, uint16_t *buf){
     mpr121_read16(MPR121_ELECTRODE_FILTERED_DATA_REG + (electrode * 2), buf);
@@ -209,6 +212,20 @@ static void mpr121_filtered_data(uint8_t electrode, uint16_t *buf){
  *
  * \param electrode Electrode number
  * \param buf Buffer to read into
+ *
+ * From the MPR112 datasheet:
+ * > Along with the 10-bit electrode filtered data output, each channel
+ * > also has a 10-bit baseline value. These values are the output of
+ * > the internal baseline filter operation tracking the slow-voltage
+ * > variation of the background capacitance change. Touch/release 
+ * > detection is made based on the comparison between the 10-bit
+ * > electrode filtered data and the 10-bit baseline value.
+ * 
+ * > Although internally the baseline value is 10-bit, users can only
+ * > access the 8 MSB of the 10-bit baseline value through the baseline
+ * > value registers.
+ * 
+ * \sa mpr121_filtered_data
  */
 static void mpr121_baseline_value(uint8_t electrode, uint16_t *buf){
     uint8_t baseline;
