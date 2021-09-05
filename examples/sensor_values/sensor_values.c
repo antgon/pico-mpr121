@@ -1,15 +1,23 @@
-/* MPR121 touch sensor example.
+/*
+ * Copyright (c) 2021 Antonio González
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+
+/* sensor_values example.
 
 In this example only one touch sensor (electrode) is enabled. Then, this
 electrode is polled at 100-ms intervals and
 
-1. If the sensors has been touched, the on-board LED lights up.
+1. If the sensor has been touched, the on-board LED lights up.
 
-2. Three values are read from that sensor and printed. These are
-`is_touched` (bool), `baseline` (uint8), and `filtered` (uint8). It is
-possible to plot these values in real time (e.g. with MicroDAQ,
-https://github.com/antgon/microdaq) to visualise, debug, and tune the
-touch sensor.
+2. Three values are read from that sensor and printed: (i) whether the
+sensor has been touched (`is_touched`, bool), (ii) The baseline sensor
+value (`baseline`, uint8), and (iii) the filtered value of the sensor
+(`filtered`, uint8). It is possible to plot these values in real time
+(e.g. with MicroDAQ, https://github.com/antgon/microdaq) to visualise,
+debug, and tune the touch sensor.
 */
 
 #include <stdio.h>
@@ -38,7 +46,7 @@ int main()
 {
     stdio_init_all();
 
-    // Setup the default LED.
+    // Setup the default, on-board LED.
     const uint LED_PIN = PICO_DEFAULT_LED_PIN;
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
