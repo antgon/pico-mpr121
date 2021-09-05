@@ -5,28 +5,29 @@ electrode is polled at 100-ms intervals and
 
 1. If the sensors has been touched, the on-board LED lights up.
 
-2. Three values are read from that sensor and printed. These are `is_touched`
-   (bool), baseline value (uint8), and filtered data value (uint8). It is
-   possible to plot these values in real time (e.g. with MicroDAQ,
-   https://github.com/antgon/microdaq) to visualise, debug, and tune the touch
-   sensor.
+2. Three values are read from that sensor and printed. These are
+`is_touched` (bool), `baseline` (uint8), and `filtered` (uint8). It is
+possible to plot these values in real time (e.g. with MicroDAQ,
+https://github.com/antgon/microdaq) to visualise, debug, and tune the
+touch sensor.
 */
 
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 
-// I2C pins
+// I2C definitions: port and pin numbers
 #define I2C_PORT i2c0
 #define I2C_SDA 8
 #define I2C_SCL 9
 
-// I2C address and frequency. These are the default values. Uncomment only if
-// you need to re-define these values.
+// I2C definitions: address and frequency. These are the default
+// values. Uncomment only if you need to re-define these.
 // #define MPR121_ADDR 0x5A
 // #define MPR121_I2C_FREQ 100000
 
-// Touch and release thresholds. Uncomment to change these default values.
+// Touch and release thresholds. Uncomment to change these default
+// values.
 // #define MPR121_TOUCH_THRESHOLD 16
 // #define MPR121_RELEASE_THRESHOLD 10
 
@@ -62,8 +63,9 @@ int main()
     uint16_t baseline, filtered;
 
     while(1) {
-        // Check if the electrode has been touched, and read the baseline and
-        // filtered data values (useful for debugging and tuning the sensor).
+        // Check if the electrode has been touched, and read the
+        // baseline and filtered data values (useful for debugging and
+        // tuning the sensor).
         mpr121_is_touched(electrode, &is_touched);
         mpr121_baseline_value(electrode, &baseline);
         mpr121_filtered_data(electrode, &filtered);
