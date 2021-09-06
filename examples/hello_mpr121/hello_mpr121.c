@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-/* hello_mpr121 example.
+/* MPR121 hello_mpr121 example.
 
 Whenever a sensor (electrode) is touched, the on-board LED lights on and the sensor number is printed.
 */

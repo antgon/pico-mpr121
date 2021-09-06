@@ -18,8 +18,8 @@ add_executable(autoconfig_sensor autoconfig_sensor.c)
 # This stdio configuration alows to see the Pico output when connected to a
 # picoprobe. Enable usb and disable uart for standalone operation (direct USB
 # connection).
-pico_enable_stdio_uart(autoconfig_sensor 1)
-pico_enable_stdio_usb(autoconfig_sensor 0)
+pico_enable_stdio_uart(autoconfig_sensor 0)
+pico_enable_stdio_usb(autoconfig_sensor 1)
 
 # Standard and additional libraries.
 target_link_libraries(autoconfig_sensor

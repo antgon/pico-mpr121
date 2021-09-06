@@ -4,9 +4,12 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-/* autoconfig_sensor example.
+/* MPR121 autoconfig_sensor example.
 
-In addition to the MPR121 touch sensor, this example requires some other components: an external button (BTN) wired to a GPIO (and debounced with a capacitor, C), and, optionally, two LEDs:
+In addition to the MPR121 touch sensor, this example requires some
+other components: an external button (BTN) wired as shown to a GPIO
+(and debounced with a capacitor, C), and, optionally, two LEDs, each
+connected to one GPIO:
 
 GPIO
  |
@@ -19,9 +22,17 @@ GND
 GPIO - R - LED - GND
 
 One touch sensor (electrode) is enabled in the MPR121. Then, just like
-with the example `sensor_values`, this electrode is polled at 100-ms intervals and three relevant values are printed: `is_touched`, `baseline`, and `filtered`. The novelty in this example is that pressing the button autoconfigures the electrode. If autoconfiguration fails, one external LED lights up, and if it succeeds the other external LED lights up.
+with the example `sensor_values`, this electrode is polled at 100-ms
+intervals and three relevant values are printed: `is_touched`,
+`baseline`, and `filtered`. The novelty in this example is that
+pressing the button autoconfigures the electrode. If autoconfiguration
+fails, one external LED lights up, and if it succeeds the other
+external LED lights up (useful for debugging but these LEDs are
+optional).
 
-This is useful to investigate (and tune) the behaviour of the touch sensor and it's ability to "adapt" (by triggering autoconfiguration) to changing conditions in the sensor.
+This is useful to investigate (and tune) the behaviour of the touch
+sensor and it's ability to "adapt" (by triggering autoconfiguration) to
+changing conditions in the sensor.
 */
 
 #include <stdio.h>

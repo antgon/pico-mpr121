@@ -5,7 +5,7 @@
  */
 
 
-/* sensor_values example.
+/* MPR121 sensor_values example.
 
 In this example only one touch sensor (electrode) is enabled. Then, this
 electrode is polled at 100-ms intervals and
