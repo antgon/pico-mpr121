@@ -11,13 +11,13 @@
 #include "hardware/i2c.h"
 
 /** \file mpr121.h
- * \brief Library for using an MPR121-based touch sensor with the Raspberry Pi
- * Pico
+ * \brief Library for using an MPR121-based touch sensor with the
+ * Raspberry Pi Pico
  *
 */
 
-#ifndef I2C_PORT
-#define I2C_PORT i2c0
+#ifndef MPR121_I2C_PORT
+#define MPR121_I2C_PORT i2c0
 #endif
 
 #ifndef MPR121_ADDR
@@ -99,7 +99,7 @@ bool mpr121_autoconfig(void);
  */
 static void mpr121_write(enum mpr121_register reg, uint8_t val) {
     uint8_t buf[] = {reg, val};
-    i2c_write_blocking(I2C_PORT, MPR121_ADDR, buf, 2, false);
+    i2c_write_blocking(MPR121_I2C_PORT, MPR121_ADDR, buf, 2, false);
 }
 
 /*! \brief Read a byte from the specified register
@@ -108,8 +108,8 @@ static void mpr121_write(enum mpr121_register reg, uint8_t val) {
  * \param buf The buffer to read into
  */
 static void mpr121_read(enum mpr121_register reg, uint8_t *buf) {
-    i2c_write_blocking(I2C_PORT, MPR121_ADDR, &reg, 1, true);
-    i2c_read_blocking(I2C_PORT, MPR121_ADDR, buf, 1, false);
+    i2c_write_blocking(MPR121_I2C_PORT, MPR121_ADDR, &reg, 1, true);
+    i2c_read_blocking(MPR121_I2C_PORT, MPR121_ADDR, buf, 1, false);
 }
 
 /*! \brief Read a 2-byte value from the specified register
@@ -119,8 +119,8 @@ static void mpr121_read(enum mpr121_register reg, uint8_t *buf) {
  */
 static void mpr121_read16(enum mpr121_register reg, uint16_t *buf) {
     uint8_t vals[2];
-    i2c_write_blocking(I2C_PORT, MPR121_ADDR, &reg, 1, true);
-    i2c_read_blocking(I2C_PORT, MPR121_ADDR, vals, 2, false);
+    i2c_write_blocking(MPR121_I2C_PORT, MPR121_ADDR, &reg, 1, true);
+    i2c_read_blocking(MPR121_I2C_PORT, MPR121_ADDR, vals, 2, false);
     *buf = vals[1] << 8 | vals[0];
 }
 
