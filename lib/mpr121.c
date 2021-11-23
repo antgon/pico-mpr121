@@ -24,23 +24,20 @@ void mpr121_init(void) {
     // Maximum Half Delta (MHD): Determines the largest magnitude of
     // variation to pass through the baseline filter. The range of the
     // effective value is 1~63.
-    // Initial values: rising, 0x2B; falling, 0x2F.
     mpr121_write(MPR121_MAX_HALF_DELTA_RISING_REG, 0x01);
     mpr121_write(MPR121_MAX_HALF_DELTA_FALLING_REG, 0x01);
     
     // Noise Half Delta (NHD): Determines the incremental change when
     // non-noise drift is detected. The range of the effective value is
     // 1~63.
-    // Initial values: rising, 0x2C; falling, 0x30; touched, 0x33.
     mpr121_write(MPR121_NOISE_HALF_DELTA_RISING_REG, 0x01);
     mpr121_write(MPR121_NOISE_HALF_DELTA_FALLING_REG, 0x05);
-    mpr121_write(MPR121_NOISE_HALF_DELTA_TOUCHED_REG, 0x00);
+    mpr121_write(MPR121_NOISE_HALF_DELTA_TOUCHED_REG, 0x00);  
     
     // Noise Count Limit (NCL): Determines the number of samples
     // consecutively greater than the Max Half Delta value. This is
     // necessary to determine that it is not noise. The range of the
     // effective value is 0~255.
-    // Initial values: rising, 0x2D; falling, 0x31; touched, 0x34.
     mpr121_write(MPR121_NOISE_COUNT_LIMIT_RISING_REG, 0x0E);
     mpr121_write(MPR121_NOISE_COUNT_LIMIT_FALLING_REG, 0x01);
     mpr121_write(MPR121_NOISE_COUNT_LIMIT_TOUCHED_REG, 0x00);
@@ -48,7 +45,6 @@ void mpr121_init(void) {
     // Filter Delay Count Limit (FDL): Determines the operation rate of
     // the filter. A larger count limit means the filter delay is
     // operating more slowly. The range of the effective value is 0~255.
-    // Initial values: rising, 0x2E; falling, 0x32; touched, 0x35.
     mpr121_write(MPR121_FILTER_DELAY_COUNT_RISING_REG, 0x00);
     mpr121_write(MPR121_FILTER_DELAY_COUNT_FALLING_REG, 0x00);
     mpr121_write(MPR121_FILTER_DELAY_COUNT_TOUCHED_REG, 0x00);
