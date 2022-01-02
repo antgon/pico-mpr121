@@ -23,24 +23,20 @@ debug, and tune the touch sensor.
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
+#include "mpr121.h"
 
 // I2C definitions: port and pin numbers
 #define I2C_PORT i2c0
 #define I2C_SDA 8
 #define I2C_SCL 9
 
-// I2C definitions: address and frequency. These are the default
-// values. Uncomment only if you need to re-define these.
-// #define MPR121_ADDR 0x5A
-// #define MPR121_I2C_FREQ 100000
+// I2C definitions: address and frequency.
+#define MPR121_ADDR 0x5A
+#define MPR121_I2C_FREQ 100000
 
-// Touch and release thresholds. Uncomment to change these default
-// values.
-// #define MPR121_TOUCH_THRESHOLD 16
-// #define MPR121_RELEASE_THRESHOLD 10
-
-// Include the MPR11 library only after the definitions above.
-#include "mpr121.h"
+// Touch and release thresholds.
+#define MPR121_TOUCH_THRESHOLD 16
+#define MPR121_RELEASE_THRESHOLD 10
 
 int main()
 {
@@ -59,11 +55,14 @@ int main()
     gpio_pull_up(I2C_SCL);
 
     // Initialise and autoconfigure the touch sensor.
-    mpr121_init();
-    mpr121_autoconfig();
+    struct mpr121_sensor mpr121;
+    mpr121_init(I2C_PORT, MPR121_ADDR, &mpr121);
+    mpr121_set_thresholds(MPR121_TOUCH_THRESHOLD,
+                          MPR121_RELEASE_THRESHOLD, &mpr121);
+    mpr121_autoconfig(&mpr121);
 
     // Enable only one touch sensor (electrode 0).
-    mpr121_enable_electrodes(1);
+    mpr121_enable_electrodes(1, &mpr121);
 
     // Initialise data variables.
     const uint8_t electrode = 0;
@@ -74,9 +73,9 @@ int main()
         // Check if the electrode has been touched, and read the
         // baseline and filtered data values (useful for debugging and
         // tuning the sensor).
-        mpr121_is_touched(electrode, &is_touched);
-        mpr121_baseline_value(electrode, &baseline);
-        mpr121_filtered_data(electrode, &filtered);
+        mpr121_is_touched(electrode, &is_touched, &mpr121);
+        mpr121_baseline_value(electrode, &baseline, &mpr121);
+        mpr121_filtered_data(electrode, &filtered, &mpr121);
 
         // Switch on the on-board LED if the electrode has been touched.
         if (is_touched){
