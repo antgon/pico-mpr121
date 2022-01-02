@@ -34,19 +34,4 @@ target_link_libraries(touch
 .
 ```
 
-2. Use the library. See the examples directory for the full code.
-```c
-.
-.
-.
-#define I2C_PORT i2c0
-#define I2C_SDA 8
-#define I2C_SCL 9
-
-#include "mpr121.h"
-
-int main() {
-    ...
-}
-```
-
+2. Use the library; see the examples directory.
