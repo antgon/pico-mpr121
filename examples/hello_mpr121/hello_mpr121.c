@@ -16,8 +16,8 @@ Whenever a sensor (electrode) is touched, the on-board LED lights on and the sen
 
 // I2C definitions: port and pin numbers
 #define I2C_PORT i2c0
-#define I2C_SDA 8
-#define I2C_SCL 9
+#define I2C_SDA 20
+#define I2C_SCL 21
 
 // I2C definitions: address and frequency.
 #define MPR121_ADDR 0x5A

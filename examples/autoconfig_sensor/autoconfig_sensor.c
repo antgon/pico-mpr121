@@ -41,14 +41,15 @@ changing conditions in the sensor.
 #include "mpr121.h"
 
 #define I2C_PORT i2c0
-#define I2C_SDA 8
-#define I2C_SCL 9
+#define I2C_SDA 20
+#define I2C_SCL 21
 
 // MPR121 I2C definitions
 #define MPR121_ADDR 0x5A
 #define MPR121_I2C_FREQ 100000
 #define MPR121_TOUCH_THRESHOLD 12
 #define MPR121_RELEASE_THRESHOLD 6
+struct mpr121_sensor mpr121;
 
 // The Pico's onboard LED.
 const uint8_t led = PICO_DEFAULT_LED_PIN;
@@ -56,17 +57,17 @@ const uint8_t led = PICO_DEFAULT_LED_PIN;
 // In this example two external LEDs are wired: one red to indicate
 // autoconfiguration failure, and one green to indicate success. These
 // LEDs are optional. The pins that control these LEDs are:
-const uint8_t red_led = 16;
-const uint8_t green_led = 18;
+const uint8_t red_led = 14;
+const uint8_t green_led = 15;
 
 // An external button is connected to this pin.
-const uint8_t button = 17;
+const uint8_t button = 13;
 
 // A callback triggered by the pressing of the button. This will
 // autoconfigure the touch sensor, and light up a LED if it succeeds,
 // or a different one if it fails.
 void button_callback(uint gpio, uint32_t events) {
-    bool autoconfig_successful = mpr121_autoconfig();
+    bool autoconfig_successful = mpr121_autoconfig(&mpr121);
     if (autoconfig_successful) {
         gpio_put(green_led, 1);
         busy_wait_ms(150);
@@ -105,7 +106,6 @@ int main()
     gpio_pull_up(I2C_SCL);
 
     // Touch sensor initialisation
-    struct mpr121_sensor mpr121;
     mpr121_init(I2C_PORT, MPR121_ADDR, &mpr121);
     mpr121_set_thresholds(MPR121_TOUCH_THRESHOLD,
                           MPR121_RELEASE_THRESHOLD, &mpr121);
