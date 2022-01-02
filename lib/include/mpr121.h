@@ -16,25 +16,12 @@
  *
 */
 
-#ifndef MPR121_I2C_PORT
-#define MPR121_I2C_PORT i2c0
-#endif
-
-#ifndef MPR121_ADDR
-#define MPR121_ADDR 0x5A
-#endif
-
-#ifndef MPR121_I2C_FREQ
-#define MPR121_I2C_FREQ 100000
-#endif
-
-#ifndef MPR121_TOUCH_THRESHOLD
-#define MPR121_TOUCH_THRESHOLD 16
-#endif
-
-#ifndef MPR121_RELEASE_THRESHOLD
-#define MPR121_RELEASE_THRESHOLD 10
-#endif
+typedef struct mpr121_sensor {
+    i2c_inst_t *i2c_port;
+    uint8_t i2c_addr;
+    // uint8_t i2c_sda;
+    // uint8_t ic2_scl;
+} mpr121_sensor_t;
 
 /*! \brief MPR121 register map
  */
@@ -76,10 +63,14 @@ enum mpr121_register {
     MPR121_SOFT_RESET_REG = 0x80u
 };
 
-/*! \brief Resets the MPR121 and configures registers
+/*! \brief Initialise the MPR121 and configure registers
  *
+ * \param i2c_port The I2C instance, either i2c0 or i2c1
+ * \param i2c_addr The I2C address of the MPR121 device
+ * \param sensor Pointer to the structure that stores the MPR121 info
  */
-void mpr121_init(void);
+void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
+                 mpr121_sensor_t *sensor);
 
 /*! \brief Autoconfigure sensors
  *
@@ -88,40 +79,53 @@ void mpr121_init(void);
  * Here, these values have been calculated for Vdd = 3.3 V, which is
  * that in the Pico.
  * 
+ * \param sensor Pointer to the structure that stores the MPR121 info
+ * 
  * \return true if autoconfiguration was successful
  */
-bool mpr121_autoconfig(void);
+bool mpr121_autoconfig(mpr121_sensor_t *sensor);
 
 /*! \brief Write a value to the specified register
  *
  * \param reg The register address
  * \param val The value to write
+ * \param sensor Pointer to the structure that stores the MPR121 info
  */
-static void mpr121_write(enum mpr121_register reg, uint8_t val) {
+static void mpr121_write(enum mpr121_register reg, uint8_t val,
+                         mpr121_sensor_t *sensor) {
     uint8_t buf[] = {reg, val};
-    i2c_write_blocking(MPR121_I2C_PORT, MPR121_ADDR, buf, 2, false);
+    i2c_write_blocking(sensor->i2c_port, sensor->i2c_addr, buf, 2,
+                       false);
 }
 
 /*! \brief Read a byte from the specified register
  *
  * \param reg The register address
- * \param buf The buffer to read into
+ * \param dst Pointer to buffer to receive data
+ * \param sensor Pointer to the structure that stores the MPR121 info
  */
-static void mpr121_read(enum mpr121_register reg, uint8_t *buf) {
-    i2c_write_blocking(MPR121_I2C_PORT, MPR121_ADDR, &reg, 1, true);
-    i2c_read_blocking(MPR121_I2C_PORT, MPR121_ADDR, buf, 1, false);
+static void mpr121_read(enum mpr121_register reg, uint8_t *dst,
+                        mpr121_sensor_t *sensor) {
+    i2c_write_blocking(sensor->i2c_port, sensor->i2c_addr, &reg, 1,
+                       true);
+    i2c_read_blocking(sensor->i2c_port, sensor->i2c_addr, dst, 1,
+                      false);
 }
 
 /*! \brief Read a 2-byte value from the specified register
  *
  * \param reg The register address
- * \param buf The buffer to read into
+ * \param dst Pointer to buffer to receive data
+ * \param sensor Pointer to the structure that stores the MPR121 info
  */
-static void mpr121_read16(enum mpr121_register reg, uint16_t *buf) {
+static void mpr121_read16(enum mpr121_register reg, uint16_t *dst,
+                          mpr121_sensor_t *sensor) {
     uint8_t vals[2];
-    i2c_write_blocking(MPR121_I2C_PORT, MPR121_ADDR, &reg, 1, true);
-    i2c_read_blocking(MPR121_I2C_PORT, MPR121_ADDR, vals, 2, false);
-    *buf = vals[1] << 8 | vals[0];
+    i2c_write_blocking(sensor->i2c_port, sensor->i2c_addr, &reg, 1,
+                       true);
+    i2c_read_blocking(sensor->i2c_port, sensor->i2c_addr, vals, 2,
+                      false);
+    *dst = vals[1] << 8 | vals[0];
 }
 
 /*! \brief Set touch and release thresholds
@@ -133,85 +137,96 @@ static void mpr121_read16(enum mpr121_register reg, uint16_t *buf) {
  *  
  * \param touch Touch threshold in the range 0--255
  * \param release Release threshold in the range 0--255
+ * \param sensor Pointer to the structure that stores the MPR121 info
  */
-static void mpr121_set_thresholds(uint8_t touch, uint8_t release) {
+static void mpr121_set_thresholds(uint8_t touch, uint8_t release,
+                                  mpr121_sensor_t *sensor) {
     uint8_t config;
-    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config);
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
     if (config != 0){
         // Stop mode
-        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00);
+        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
     }
     
     for (uint8_t i=0; i<12; i++) {
-        mpr121_write(MPR121_TOUCH_THRESHOLD_REG + i * 2, touch);
-        mpr121_write(MPR121_RELEASE_THRESHOLD_REG + i * 2, release);
+        mpr121_write(MPR121_TOUCH_THRESHOLD_REG + i * 2, touch, sensor);
+        mpr121_write(MPR121_RELEASE_THRESHOLD_REG + i * 2, release, sensor);
     }
 
     if (config != 0){
-        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config);
+        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
     }
 }
 
 /*! \brief Enable only the number of electrodes specified
  * 
  * \param nelec Number of electrodes to enable
+ * \param sensor Pointer to the structure that stores the MPR121 info
  * 
  * E.g. if `nelec` is 3, only electrodes 0 to 2 will be enabled; if it
  * is 6, electrodes 0 to 5 will be enabled. From the datasheet:
  * "Enabling specific channels will save the scan time and sensing
  * field power spent on the unused channels."
  */
-static void mpr121_enable_electrodes(uint8_t nelec){
+static void mpr121_enable_electrodes(uint8_t nelec,
+                                     mpr121_sensor_t *sensor){
     uint8_t config;
-    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config);
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
     config &= 0xf0 + nelec;
-    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00);
-    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
 }
 
 /*! \brief Read the touch/release status of all 13 input channels
  *
- * \param buf Buffer to read into
+ * \param dst Pointer to buffer to receive data
+ * \param sensor Pointer to the structure that stores the MPR121 info
  *
  * In the value read, bits 11-0 represent electrodes 11 to 0,
  * respectively, and bit 12 is the proximity detection channel. Each
  * bit represent the status of these channels: 1 if the channel is
  * touched, 0 if it is released.
  */
-static void mpr121_touched(uint16_t *buf) {
-    mpr121_read16(MPR121_TOUCH_STATUS_REG, buf);
-    *buf &= 0x0fff;
+static void mpr121_touched(uint16_t *dst, mpr121_sensor_t *sensor) {
+    mpr121_read16(MPR121_TOUCH_STATUS_REG, dst, sensor);
+    *dst &= 0x0fff;
 }
 
 /*! \brief Determine whether an electrode has been touched
  *
  * \param electrode Electrode number
- * \param buf Buffer to read into
+ * \param dst Pointer to buffer to receive data
+ * \param sensor Pointer to the structure that stores the MPR121 info
  */
-static void mpr121_is_touched(uint8_t electrode, bool *buf){
+static void mpr121_is_touched(uint8_t electrode, bool *dst,
+                              mpr121_sensor_t *sensor){
     uint16_t touched;
-    mpr121_touched(&touched);
-    *buf = (bool) (touched >> electrode) & 1;
+    mpr121_touched(&touched, sensor);
+    *dst = (bool) ((touched >> electrode) & 1);
 }
 
 /*! \brief Read an electrode's filtered data value
  *
  * \param electrode Electrode number
- * \param buf Buffer to read into
+ * \param dst Pointer to buffer to receive data
+ * \param sensor Pointer to the structure that stores the MPR121 info
  * 
  * The data range of the filtered data is 0 to 1024.
  * \sa mpr121_baseline_value
  */
-static void mpr121_filtered_data(uint8_t electrode, uint16_t *buf){
-    mpr121_read16(MPR121_ELECTRODE_FILTERED_DATA_REG + (electrode * 2), buf);
+static void mpr121_filtered_data(uint8_t electrode, uint16_t *dst,
+                                 mpr121_sensor_t *sensor){
+    mpr121_read16(MPR121_ELECTRODE_FILTERED_DATA_REG + (electrode * 2),
+                  dst, sensor);
     // Filtered data is 10-bit
-    *buf &= 0x3ff;
+    *dst &= 0x3ff;
 }
 
 /*! \brief Read an electrode's baseline value
  *
  * \param electrode Electrode number
- * \param buf Buffer to read into
+ * \param dst Pointer to buffer to receive data
+ * \param sensor Pointer to the structure that stores the MPR121 info
  *
  * From the MPR112 datasheet:
  * > Along with the 10-bit electrode filtered data output, each channel
@@ -227,15 +242,17 @@ static void mpr121_filtered_data(uint8_t electrode, uint16_t *buf){
  * 
  * \sa mpr121_filtered_data
  */
-static void mpr121_baseline_value(uint8_t electrode, uint16_t *buf){
+static void mpr121_baseline_value(uint8_t electrode, uint16_t *dst,
+                                  mpr121_sensor_t *sensor){
     uint8_t baseline;
-    mpr121_read(MPR121_BASELINE_VALUE_REG + electrode, &baseline);
+    mpr121_read(MPR121_BASELINE_VALUE_REG + electrode, &baseline,
+                sensor);
     // From the datasheet: Although internally the baseline value is
     // 10-bit, users can only access the 8 MSB of the 10-bit baseline
     // value through the baseline value registers. The read out from the
     // baseline register must be left shift two bits before comparing it
     // with the 10-bit electrode data.
-    *buf = baseline << 2;
+    *dst = baseline << 2;
 }
 
 #endif

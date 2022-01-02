@@ -6,48 +6,48 @@
 
 #include "mpr121.h"
 
-void mpr121_init(void) {
+void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
+                 mpr121_sensor_t *sensor) {
+    sensor->i2c_port = i2c_port;
+    sensor->i2c_addr = i2c_addr;
+
     // Writing 0x80 (SOFT_RESET) with 0x63 asserts soft reset.
-    mpr121_write(MPR121_SOFT_RESET_REG, 0x63);
+    mpr121_write(MPR121_SOFT_RESET_REG, 0x63, sensor);
     
     // Enter stop mode: set all ELEPROX_EN and ELE_EN bits to zero. This
     // is because register write operations can only be done in stop
     // mode.
-    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00);
-
-    // Set touch and release thresholds.
-    mpr121_set_thresholds(MPR121_TOUCH_THRESHOLD,
-                          MPR121_RELEASE_THRESHOLD);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
 
     // Configure electrode filtered data and baseline registers
 
     // Maximum Half Delta (MHD): Determines the largest magnitude of
     // variation to pass through the baseline filter. The range of the
     // effective value is 1~63.
-    mpr121_write(MPR121_MAX_HALF_DELTA_RISING_REG, 0x01);
-    mpr121_write(MPR121_MAX_HALF_DELTA_FALLING_REG, 0x01);
+    mpr121_write(MPR121_MAX_HALF_DELTA_RISING_REG, 0x01, sensor);
+    mpr121_write(MPR121_MAX_HALF_DELTA_FALLING_REG, 0x01, sensor);
     
     // Noise Half Delta (NHD): Determines the incremental change when
     // non-noise drift is detected. The range of the effective value is
     // 1~63.
-    mpr121_write(MPR121_NOISE_HALF_DELTA_RISING_REG, 0x01);
-    mpr121_write(MPR121_NOISE_HALF_DELTA_FALLING_REG, 0x05);
-    mpr121_write(MPR121_NOISE_HALF_DELTA_TOUCHED_REG, 0x00);  
+    mpr121_write(MPR121_NOISE_HALF_DELTA_RISING_REG, 0x01, sensor);
+    mpr121_write(MPR121_NOISE_HALF_DELTA_FALLING_REG, 0x05, sensor);
+    mpr121_write(MPR121_NOISE_HALF_DELTA_TOUCHED_REG, 0x00, sensor);  
     
     // Noise Count Limit (NCL): Determines the number of samples
     // consecutively greater than the Max Half Delta value. This is
     // necessary to determine that it is not noise. The range of the
     // effective value is 0~255.
-    mpr121_write(MPR121_NOISE_COUNT_LIMIT_RISING_REG, 0x0E);
-    mpr121_write(MPR121_NOISE_COUNT_LIMIT_FALLING_REG, 0x01);
-    mpr121_write(MPR121_NOISE_COUNT_LIMIT_TOUCHED_REG, 0x00);
+    mpr121_write(MPR121_NOISE_COUNT_LIMIT_RISING_REG, 0x0E, sensor);
+    mpr121_write(MPR121_NOISE_COUNT_LIMIT_FALLING_REG, 0x01, sensor);
+    mpr121_write(MPR121_NOISE_COUNT_LIMIT_TOUCHED_REG, 0x00, sensor);
     
     // Filter Delay Count Limit (FDL): Determines the operation rate of
     // the filter. A larger count limit means the filter delay is
     // operating more slowly. The range of the effective value is 0~255.
-    mpr121_write(MPR121_FILTER_DELAY_COUNT_RISING_REG, 0x00);
-    mpr121_write(MPR121_FILTER_DELAY_COUNT_FALLING_REG, 0x00);
-    mpr121_write(MPR121_FILTER_DELAY_COUNT_TOUCHED_REG, 0x00);
+    mpr121_write(MPR121_FILTER_DELAY_COUNT_RISING_REG, 0x00, sensor);
+    mpr121_write(MPR121_FILTER_DELAY_COUNT_FALLING_REG, 0x00, sensor);
+    mpr121_write(MPR121_FILTER_DELAY_COUNT_TOUCHED_REG, 0x00, sensor);
 
     // Debounce. Value range for each is 0~7.
     // Bits 2-0, debounce touch (DT).
@@ -56,7 +56,7 @@ void mpr121_init(void) {
     // bits will only take place after the number of consecutive touch
     // or release detection meets the debounce number setting. The
     // status bit change will have a delay if debounce is set.
-    mpr121_write(MPR121_DEBOUNCE_REG, 0x00);
+    mpr121_write(MPR121_DEBOUNCE_REG, 0x00, sensor);
 
     // Global filter and charge/discharge settings
 
@@ -71,7 +71,7 @@ void mpr121_init(void) {
     // 16 (0b010000) = 16 µA.
     //
     // Defaults = 0b00010000 = 0x10
-    mpr121_write(MPR121_AFE_CONFIG_REG , 0x10);
+    mpr121_write(MPR121_AFE_CONFIG_REG , 0x10, sensor);
 
     // Register 0x5D (Filter configuration register)
     //
@@ -90,7 +90,7 @@ void mpr121_init(void) {
     // (encoding 4) = 16 ms.
     // 
     // Defaults = 0b00100100 = 0x24
-    mpr121_write(MPR121_FILTER_CONFIG_REG, 0x24);
+    mpr121_write(MPR121_FILTER_CONFIG_REG, 0x24, sensor);
 
     // Electrode configuration (register 0x5E).
     //
@@ -115,33 +115,33 @@ void mpr121_init(void) {
     // for all 12 electrodes.
     //
     // Value 0b00001111 = 0x0F Value 0b11001111 = 0xCF
-    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0xCF);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0xCF, sensor);
 }
 
-bool mpr121_autoconfig(void){
+bool mpr121_autoconfig(mpr121_sensor_t *sensor){
     // Read current configuration and then enter stop mode. Stop mode
     // is needed because register write operations can only be done in
     // this mode.
     uint8_t config;
-    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config);
-    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00);
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
 
     // Autoconfig USL register: the upper limit for the
     // auto-configuration. This value (and those that follow below)
     // were calculated based on Vdd = 3.3 V and following the equations
     // in NXP Application Note AN3889.
     // USL = 201 = 0xC9
-    mpr121_write(MPR121_AUTOCONFIG_USL_REG, 0xC9);
+    mpr121_write(MPR121_AUTOCONFIG_USL_REG, 0xC9, sensor);
 
     // Autoconfig target level register: the target level for the 
     // auto-configuration baseline search.
     // TL = 181 = 0xB5
-    mpr121_write(MPR121_AUTOCONFIG_TARGET_REG, 0xB5);
+    mpr121_write(MPR121_AUTOCONFIG_TARGET_REG, 0xB5, sensor);
 
     // Autoconfig LSL register: the lower limit for the
     // auto-configuration.
     // LSL = 131 = 0x83
-    mpr121_write(MPR121_AUTOCONFIG_LSL_REG, 0x83);
+    mpr121_write(MPR121_AUTOCONFIG_LSL_REG, 0x83, sensor);
 
     // Autoconfiguration control register.
     //
@@ -161,17 +161,18 @@ bool mpr121_autoconfig(void){
     //
     // Automatic Reconfiguration Enable (ACE), bit 0. Default is 0b1,
     // enabled.
-    mpr121_write(MPR121_AUTOCONFIG_CONTROL_0_REG, 0x0B);
+    mpr121_write(MPR121_AUTOCONFIG_CONTROL_0_REG, 0x0B, sensor);
 
     // Re-enable electrode(s) by writing back the configuration bits.
-    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
 
     // Check to see if autoconfiguration worked. Bits 7-6 in ELE-8
     // out-of-range register are flags that are set when
     // auto-(re)configuration fails.
     bool success = false;
     uint8_t out_of_range_status;
-    mpr121_read(MPR121_OUT_OF_RANGE_STATUS_1_REG, &out_of_range_status);
+    mpr121_read(MPR121_OUT_OF_RANGE_STATUS_1_REG, &out_of_range_status,
+                sensor);
     if ((out_of_range_status & 0b11000000) == 0){
         success = true;
     }
