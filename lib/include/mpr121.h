@@ -163,7 +163,7 @@ static void mpr121_set_thresholds(uint8_t touch, uint8_t release,
  * \param nelec Number of electrodes to enable
  * \param sensor Pointer to the structure that stores the MPR121 info
  * 
- * E.g. if `nelec` is 3, only electrodes 0 to 2 will be enabled; if it
+ * E.g. if `nelec` is 3, electrodes 0 to 2 will be enabled; if `nelec`
  * is 6, electrodes 0 to 5 will be enabled. From the datasheet:
  * "Enabling specific channels will save the scan time and sensing
  * field power spent on the unused channels."
@@ -172,7 +172,14 @@ static void mpr121_enable_electrodes(uint8_t nelec,
                                      mpr121_sensor_t *sensor){
     uint8_t config;
     mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
-    config &= 0xf0 + nelec;
+
+    // Clear bits 3-0, which controls the operation of the 12
+    // electrodes.
+    config &= ~0x0f;
+
+    // Set number of electrodes enabled
+    config |= nelec;
+
     mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
     mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
 }
