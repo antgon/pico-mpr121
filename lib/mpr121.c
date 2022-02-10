@@ -10,14 +10,14 @@ void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
                  mpr121_sensor_t *sensor) {
     sensor->i2c_port = i2c_port;
     sensor->i2c_addr = i2c_addr;
-
-    // Writing 0x80 (SOFT_RESET) with 0x63 asserts soft reset.
-    mpr121_write(MPR121_SOFT_RESET_REG, 0x63, sensor);
     
     // Enter stop mode: set all ELEPROX_EN and ELE_EN bits to zero. This
     // is because register write operations can only be done in stop
     // mode.
     mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+
+    // Writing 0x80 (SOFT_RESET) with 0x63 asserts soft reset.
+    mpr121_write(MPR121_SOFT_RESET_REG, 0x63, sensor);
 
     // Configure electrode filtered data and baseline registers
 
@@ -115,6 +115,13 @@ void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
     // Quick Start Guide (AN3944) suggests 0x04.
     mpr121_write(MPR121_FILTER_CONFIG_REG, 0x04, sensor);
 
+    // Set default touch and release threshold values for all
+    // electrodes.    
+    for (uint8_t i=0; i<12; i++) {
+        mpr121_write(MPR121_TOUCH_THRESHOLD_REG + i * 2, 0x0f, sensor);
+        mpr121_write(MPR121_RELEASE_THRESHOLD_REG + i * 2, 0x0a, sensor);
+    }
+
     // Electrode configuration (register 0x5E).
     //
     // Determines if the MPR121 is in Run Mode or Stop Mode, controls
@@ -164,9 +171,9 @@ void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
 }
 
 bool mpr121_autoconfig(mpr121_sensor_t *sensor){
-    // Read current configuration and then enter stop mode. Stop mode
-    // is needed because register write operations can only be done in
-    // this mode.
+    // Read current electrode configuration and then enter stop mode.
+    // Stop mode is needed because register write operations can only
+    // be done in this mode.
     uint8_t config;
     mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
     mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
