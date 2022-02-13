@@ -13,7 +13,7 @@ void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
     
     // Enter stop mode by setting ELEPROX_EN and ELE_EN bits to zero.
     // This is needed because register write operations can only take
-    //place in stop mode.
+    // place in stop mode.
     mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
 
     // Writing 0x80 (SOFT_RESET) with 0x63 asserts soft reset.

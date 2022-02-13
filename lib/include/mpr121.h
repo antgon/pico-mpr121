@@ -153,7 +153,8 @@ static void mpr121_set_thresholds(uint8_t touch, uint8_t release,
     
     for (uint8_t i=0; i<12; i++) {
         mpr121_write(MPR121_TOUCH_THRESHOLD_REG + i * 2, touch, sensor);
-        mpr121_write(MPR121_RELEASE_THRESHOLD_REG + i * 2, release, sensor);
+        mpr121_write(MPR121_RELEASE_THRESHOLD_REG + i * 2, release,
+            sensor);
     }
 
     if (config != 0){
@@ -263,6 +264,107 @@ static void mpr121_baseline_value(uint8_t electrode, uint16_t *dst,
     // baseline register must be left shift two bits before comparing it
     // with the 10-bit electrode data.
     *dst = baseline << 2;
+}
+
+/*! \brief Set the Max Half Delta
+ *
+ * The Max Half Delta determines the largest magnitude of variation to
+ * pass through the third level filter. See application note MPR121
+ * Baseline System (AN3891) for details.
+ *
+ * \param rising Value in the range 1~63
+ * \param falling Value in the range 1~63
+ * \param sensor Pointer to the structure that stores the MPR121 info
+ */
+static void mpr121_set_max_half_delta(uint8_t rising, uint8_t falling,
+        mpr121_sensor_t *sensor) {
+    // Read current configuration then enter stop mode
+    uint8_t config;
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+    // Write MHD values
+    mpr121_write(MPR121_MAX_HALF_DELTA_RISING_REG, rising, sensor);
+    mpr121_write(MPR121_MAX_HALF_DELTA_FALLING_REG, falling, sensor);
+    // Re-enable electrodes
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
+}
+
+/*! \brief Set the Noise Half Delta
+ *
+ * The Noise Half Delta determines the incremental change when
+ * non-noise drift is detected. See application note MPR121 Baseline
+ * System (AN3891) for details.
+ *
+ * \param rising Value in the range 1~63
+ * \param falling Value in the range 1~63
+ * \param touched Value in the range 1~63
+ * \param sensor Pointer to the structure that stores the MPR121 info
+ */
+static void mpr121_set_noise_half_delta(uint8_t rising, uint8_t falling,
+        uint8_t touched, mpr121_sensor_t *sensor) {
+    // Read current configuration then enter stop mode
+    uint8_t config;
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+    // Write NHD values
+    mpr121_write(MPR121_NOISE_HALF_DELTA_RISING_REG, rising, sensor);
+    mpr121_write(MPR121_NOISE_HALF_DELTA_FALLING_REG, falling, sensor);
+    mpr121_write(MPR121_NOISE_HALF_DELTA_TOUCHED_REG, touched, sensor);
+    // Re-enable electrodes
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
+}
+
+/*! \brief Set the Noise Count Limit
+ *
+ * The Noise Count Limit determines the number of samples consecutively
+ * greater than the Max Half Delta necessary before it can be
+ * determined that it is non-noise. See application note MPR121 Baseline
+ * System (AN3891) for details.
+ *
+ * \param rising Value in the range 0~255
+ * \param falling Value in the range 0~255
+ * \param touched Value in the range 0~255
+ * \param sensor Pointer to the structure that stores the MPR121 info
+ */
+static void mpr121_set_noise_count_limit(uint8_t rising,
+        uint8_t falling, uint8_t touched, mpr121_sensor_t *sensor) {
+    // Read current configuration then enter stop mode
+    uint8_t config;
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+    // Write new NCL values
+    mpr121_write(MPR121_NOISE_COUNT_LIMIT_RISING_REG, rising, sensor);
+    mpr121_write(MPR121_NOISE_COUNT_LIMIT_FALLING_REG, falling, sensor);
+    mpr121_write(MPR121_NOISE_COUNT_LIMIT_TOUCHED_REG, touched, sensor);
+    // Re-enable electrodes
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
+}
+
+/*! \brief Set the Filter Delay Limit
+ *
+ * The Filter Delay Limit determines the rate of operation of the
+ * filter. A larger number makes it operate slower. See application
+ * note MPR121 Baseline System (AN3891) for details.
+ *
+ * \param rising Value in the range 0~255
+ * \param falling Value in the range 0~255
+ * \param touched Value in the range 0~255
+ * \param sensor Pointer to the structure that stores the MPR121 info
+ */
+static void mpr121_set_filter_delay_limit(uint8_t rising,
+        uint8_t falling, uint8_t touched, mpr121_sensor_t *sensor) {
+    // Read current configuration then enter stop mode
+    uint8_t config;
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+    // Write new FDL values
+    mpr121_write(MPR121_FILTER_DELAY_COUNT_RISING_REG, rising, sensor);
+    mpr121_write(MPR121_FILTER_DELAY_COUNT_FALLING_REG, falling,
+        sensor);
+    mpr121_write(MPR121_FILTER_DELAY_COUNT_TOUCHED_REG, touched,
+        sensor);
+    // Re-enable electrodes
+    mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
 }
 
 #endif
