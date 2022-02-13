@@ -65,6 +65,9 @@ enum mpr121_register {
 
 /*! \brief Initialise the MPR121 and configure registers
  *
+ * The default parameters used here to configure the sensor are as in
+ * the MPR121 Quick Start Guide (AN3944).
+ * 
  * \param i2c_port The I2C instance, either i2c0 or i2c1
  * \param i2c_addr The I2C address of the MPR121 device
  * \param sensor Pointer to the structure that stores the MPR121 info
