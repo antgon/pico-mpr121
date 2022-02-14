@@ -81,19 +81,6 @@ enum mpr121_register {
 void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
                  mpr121_sensor_t *sensor);
 
-/*! \brief Autoconfigure sensors
- *
- * Automatically configure charge current and charge time. The optimal
- * values used for this depend on Vdd, see NXP Application Note AN3889.
- * Here, these values have been calculated for Vdd = 3.3 V, which is
- * that in the Pico.
- * 
- * \param sensor Pointer to the structure that stores the MPR121 info
- * 
- * \return true if autoconfiguration was successful
- */
-bool mpr121_autoconfig(mpr121_sensor_t *sensor);
-
 /*! \brief Write a value to the specified register
  *
  * \param reg The register address
