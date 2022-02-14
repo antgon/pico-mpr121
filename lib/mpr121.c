@@ -19,8 +19,8 @@ void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
     // Writing 0x80 (SOFT_RESET) with 0x63 asserts soft reset.
     mpr121_write(MPR121_SOFT_RESET_REG, 0x63, sensor);
     
-    // == Capacitance sensing settings (AN2889), Filtering and timing
-    //    settings (AN3890) ============================================
+    // == Capacitance sensing settings (AN2889), Filtering and =========
+    //    timing settings (AN3890)
 
     // These settings are configured in two registers: the Filter and
     // Global CDC CDT Configuration registers (0x5C, 0x5D).
@@ -91,12 +91,14 @@ void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
     // 0x0B, where:
     //
     // First filter iterations (FFI), bits 7-6. Must be the same value
-    // of FFI as in the general configuration. Default is 0b00.
+    // of FFI as in register MPR121_AFE_CONFIG_REG (0x5C) above;
+    // default is 0b00.
     //
     // Retry, bits 5-4. Default is disabled, 0b00.
     //
-    // Baseline value adjust (BVA), bits 3-2. Default is 0b10, which
-    // allows the baseline to be adjusted.
+    // Baseline value adjust (BVA), bits 3-2. This value must be the
+    // same as the CL (calibration lock) value in the Electrode
+    // Configuration Register, below, i.e. 0b10.
     //
     // Automatic Reconfiguration Enable (ARE), bit 1. Default is 0b1,
     // enabled.
@@ -152,10 +154,12 @@ void mpr121_init(i2c_inst_t *i2c_port, uint8_t i2c_addr,
     // last register to write to because setting ELEPROX_EN and/or
     // ELE_EN to non-zero puts the sensor in Run Mode.
     //
-    // Calibration lock (CL), bits 7-6. Default, 0b00, enabled.
-    // Value 0b10 is more convenient: it enables baseline tracking with
-    // initial baseline value loaded with the 5 high bits of the first
-    // electrode data value.
+    // Calibration lock (CL), bits 7-6. The default on reset is 0b00
+    // (CL enabled). Here I set this instead to 0b10 because this
+    // enables baseline tracking with initial baseline value loaded
+    // with the 5 high bits of the first electrode data value, which
+    // makes the sensor stabilise sooner. Note that ths value must
+    // match BVA bits in the Auto-configure Control Register above.
     //
     // Proximity enable (ELEPROX_EN), bits 5-4. Default, 0b00
     // (proximity detection disabled).
