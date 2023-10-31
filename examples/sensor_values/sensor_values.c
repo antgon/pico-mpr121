@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Antonio González
+ * Copyright (c) 2021-2023 Antonio González
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -38,8 +38,7 @@ debug, and tune the touch sensor.
 #define MPR121_TOUCH_THRESHOLD 16
 #define MPR121_RELEASE_THRESHOLD 10
 
-int main()
-{
+int main() {
     stdio_init_all();
 
     // Setup the default, on-board LED.
@@ -59,7 +58,6 @@ int main()
     mpr121_init(I2C_PORT, MPR121_ADDR, &mpr121);
     mpr121_set_thresholds(MPR121_TOUCH_THRESHOLD,
                           MPR121_RELEASE_THRESHOLD, &mpr121);
-    mpr121_autoconfig(&mpr121);
 
     // Enable only one touch sensor (electrode 0).
     mpr121_enable_electrodes(1, &mpr121);
@@ -78,7 +76,7 @@ int main()
         mpr121_filtered_data(electrode, &filtered, &mpr121);
 
         // Switch on the on-board LED if the electrode has been touched.
-        if (is_touched){
+        if (is_touched) {
             gpio_put(LED_PIN, 1);
         } else {
             gpio_put(LED_PIN, 0);
