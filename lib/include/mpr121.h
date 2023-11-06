@@ -155,6 +155,37 @@ static void mpr121_set_thresholds(uint8_t touch, uint8_t release,
     }
 }
 
+/*! \brief Set debounce touch and release
+ *
+ * Debounce determines the number (1 to 8) of consecutive touch
+ * (release) detections before an interrupt is triggered and a touch
+ * (release) is reported.
+ * 
+ * \param touch Debounce touch value, range 0--7
+ * \param release Debounce release value, range 0--7
+ * \param sensor Pointer to the structure that stores the MPR121 info
+ */
+static void mpr121_set_debounce(uint8_t touch, uint8_t release,
+                                mpr121_sensor_t *sensor) {
+    uint8_t config;
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
+    if (config != 0){
+        // Stop mode
+        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+    }
+
+    // Debounce applies to all electrodes; the values cannot set
+    // independently for each electrode, as with e.g. thresholds.
+    // Bits 2-0, debounce touch (DT).
+    // Bits 6-4, debounce release (DR).
+    uint8_t debounce = (release << 4) | (touch);
+    mpr121_write(MPR121_DEBOUNCE_REG, debounce, sensor);
+
+    if (config != 0){
+        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
+    }
+}
+
 /*! \brief Enable only the number of electrodes specified
  * 
  * \param nelec Number of electrodes to enable
