@@ -160,6 +160,43 @@ static void mpr121_set_thresholds(uint8_t touch, uint8_t release,
     }
 }
 
+/*! \brief Set touch and release thresholds for one electrode
+ *
+ * A touch is detected when the difference between the baseline and the
+ * filtered data is greater than the touch threshold. A release
+ * condition occurs when this difference is lesser than the release
+ * threshold.
+ * 
+ * This function sets touch and release threshold values to the selected
+ * electrode.
+ * 
+ * Touch threshold must be larger than release threshold.
+ * 
+ * \param electrode Electrode number (0--11)
+ * \param touch Touch threshold in the range 0--255
+ * \param release Release threshold in the range 0--255
+ * \param sensor Pointer to the structure that stores the MPR121 info
+ */
+static void mpr121_set_thresholds_ele(uint8_t electrode, uint8_t touch,
+                                      uint8_t release,
+                                      mpr121_sensor_t *sensor) {
+    uint8_t config;
+    mpr121_read(MPR121_ELECTRODE_CONFIG_REG, &config, sensor);
+    if (config != 0){
+        // Stop mode
+        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, 0x00, sensor);
+    }  
+    
+    mpr121_write(MPR121_TOUCH_THRESHOLD_REG + (electrode * 2), touch,
+                 sensor);
+    mpr121_write(MPR121_RELEASE_THRESHOLD_REG + (electrode * 2),
+                 release, sensor);
+    
+    if (config != 0){
+        mpr121_write(MPR121_ELECTRODE_CONFIG_REG, config, sensor);
+    }
+}
+
 /*! \brief Set debounce touch and release
  *
  * Debounce determines the number (1 to 8) of consecutive touch
