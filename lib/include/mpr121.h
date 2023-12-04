@@ -124,12 +124,17 @@ static void mpr121_read16(enum mpr121_register reg, uint16_t *dst,
     *dst = vals[1] << 8 | vals[0];
 }
 
-/*! \brief Set touch and release thresholds
+/*! \brief Set touch and release thresholds for all electrodes
+ *
+ * A touch is detected when the difference between the baseline and the
+ * filtered data is greater than the touch threshold. A release
+ * condition occurs when this difference is lesser than the release
+ * threshold.
  * 
- * From the MPR121 datasheet (section 5.6):
- * > In a typical application, touch threshold is in the range 4--16,
- * > and it is several counts larger than the release threshold. This
- * > is to provide hysteresis and to prevent noise and jitter.
+ * This function sets the same touch and release threshold values to all
+ * electrodes.
+ * 
+ * Touch threshold must be larger than release threshold.
  *  
  * \param touch Touch threshold in the range 0--255
  * \param release Release threshold in the range 0--255
